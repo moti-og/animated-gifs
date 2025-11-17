@@ -24,101 +24,76 @@
     <a id="download" style="display:none;">Download GIF</a>
     <img id="preview" style="display:none; max-width: 100%;">
     <div id="status" style="text-align: center; margin: 10px; color: red;"></div>
-    <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js"></script>
+    <script src="https://unpkg.com/gifshot@0.4.5/dist/gifshot.js"></script>
     <script>
-        console.log('Starting FFmpeg script load...');
-        const ffmpegScript = document.createElement('script');
-        ffmpegScript.src = 'ffmpeg.js';
-        ffmpegScript.onload = function() {
-            console.log('FFmpeg script loaded');
-            if (typeof FFmpeg === 'undefined') {
-                console.error('FFmpeg global not defined after load');
-                const status = document.getElementById('status');
-                if (status) {
-                    status.textContent = 'Error: FFmpeg library failed to load properly.';
-                    status.style.color = 'red';
-                }
-                return;
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('fileInput');
+        const preview = document.getElementById('preview');
+        const downloadLink = document.getElementById('download');
+        const status = document.getElementById('status');
+
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('highlight');
+        });
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('highlight');
+        });
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('highlight');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('video/')) {
+                processVideo(file);
+            } else {
+                status.textContent = 'Please drop a video file.';
+                status.style.color = 'red';
             }
-            console.log('FFmpeg global defined:', FFmpeg);
-            const { createFFmpeg, fetchFile } = FFmpeg;
-            console.log('createFFmpeg and fetchFile extracted');
-            const ffmpeg = createFFmpeg({
-                log: true,
-                corePath: 'ffmpeg-core.js'
-            });
-            console.log('FFmpeg instance created');
-            let loaded = false;
-            const dropzone = document.getElementById('dropzone');
-            const downloadLink = document.getElementById('download');
-            const preview = document.getElementById('preview');
-            const status = document.getElementById('status');
-            dropzone.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                dropzone.classList.add('highlight');
-            });
-            dropzone.addEventListener('dragleave', () => {
-                dropzone.classList.remove('highlight');
-            });
-            dropzone.addEventListener('drop', async (e) => {
-                e.preventDefault();
-                dropzone.classList.remove('highlight');
-                const file = e.dataTransfer.files[0];
-                if (!file) return;
-                await processFile(file);
-            });
+        });
 
-            const fileInput = document.getElementById('fileInput');
-            fileInput.addEventListener('change', async (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                await processFile(file);
-            });
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('video/')) {
+                processVideo(file);
+            } else {
+                status.textContent = 'Please select a video file.';
+                status.style.color = 'red';
+            }
+        });
 
-            async function processFile(file) {
-                try {
-                    status.textContent = 'Processing...';
-                    status.style.color = 'blue';
-                    if (!loaded) {
-                        status.textContent = 'Loading FFmpeg...';
-                        console.log('Loading FFmpeg instance...');
-                        await ffmpeg.load();
-                        loaded = true;
-                        console.log('FFmpeg loaded successfully');
-                    }
-                    console.log('Writing file to FFmpeg FS:', file.name);
-                    ffmpeg.FS('writeFile', file.name, await fetchFile(file));
-                    console.log('Running FFmpeg conversion...');
-                    await ffmpeg.run('-i', file.name, '-vf', 'fps=10,scale=640:-1:flags=lanczos', '-loop', '0', 'out.gif');
-                    console.log('Conversion complete, reading output');
-                    const data = ffmpeg.FS('readFile', 'out.gif');
-                    const url = URL.createObjectURL(new Blob([data.buffer], { type: 'image/gif' }));
-                    preview.src = url;
+        function processVideo(file) {
+            status.textContent = 'Processing...';
+            status.style.color = 'blue';
+            downloadLink.style.display = 'none';
+            preview.style.display = 'none';
+
+            const url = URL.createObjectURL(file);
+
+            gifshot.createGIF({
+                video: url,
+                gifWidth: 640,
+                gifHeight: 480,
+                interval: 0.1, // 10 FPS
+                numFrames: 100, // Limit for large videos
+                frameDuration: 1,
+                sampleInterval: 10
+            }, function(obj) {
+                if (!obj.error) {
+                    preview.src = obj.image;
                     preview.style.display = 'block';
-                    downloadLink.href = url;
+                    downloadLink.href = obj.image;
                     downloadLink.download = 'output.gif';
                     downloadLink.textContent = 'Download GIF';
                     downloadLink.style.display = 'block';
                     status.textContent = 'Conversion successful!';
                     status.style.color = 'green';
-                } catch (error) {
-                    console.error('Error in processFile:', error);
-                    status.textContent = `Error: ${error.message}`;
+                } else {
+                    status.textContent = `Error: ${obj.errorMsg}`;
                     status.style.color = 'red';
-                } finally {
-                    dropzone.innerHTML = 'Drag and drop video here or <label for="fileInput" style="color: blue; cursor: pointer;">click to select</label><input type="file" id="fileInput" accept="video/*" style="display: none;">';
                 }
-            }
-        };
-        ffmpegScript.onerror = function() {
-            console.error('Failed to load FFmpeg script');
-            const status = document.getElementById('status');
-            if (status) {
-                status.textContent = 'Error: Failed to load FFmpeg library.';
-                status.style.color = 'red';
-            }
-        };
-        document.head.appendChild(ffmpegScript);
+                URL.revokeObjectURL(url);
+            });
+        }
     </script>
 </body>
 </html>
