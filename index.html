@@ -90,6 +90,9 @@
     <div id="status"></div>
     <img id="preview" style="display:none;">
     <a id="download" style="display:none;">Download GIF</a>
+    <div id="progress-container" style="width: 400px; height: 10px; background-color: #e9ecef; border-radius: 5px; margin: 10px 0; display: none;">
+        <div id="progress-bar" style="height: 100%; background-color: #007bff; width: 0%; border-radius: 5px; transition: width 0.3s;"></div>
+    </div>
     <script src="https://unpkg.com/gifshot@0.4.5/dist/gifshot.js"></script>
     <script>
         const dropzone = document.getElementById('dropzone');
@@ -98,6 +101,8 @@
         const downloadLink = document.getElementById('download');
         const status = document.getElementById('status');
         const spinner = document.getElementById('spinner');
+        const progressContainer = document.getElementById('progress-container');
+        const progressBar = document.getElementById('progress-bar');
 
         dropzone.addEventListener('dragover', (e) => {
             e.preventDefault();
@@ -132,6 +137,8 @@
             status.textContent = 'Processing...';
             status.style.color = 'blue';
             spinner.style.display = 'block';
+            progressContainer.style.display = 'block';
+            progressBar.style.width = '0%';
             downloadLink.style.display = 'none';
             preview.style.display = 'none';
 
@@ -144,9 +151,13 @@
                 interval: 0.1,
                 numFrames: 100,
                 frameDuration: 1,
-                sampleInterval: 10
+                sampleInterval: 10,
+                progressCallback: function(progress) {
+                    progressBar.style.width = (progress * 100) + '%';
+                }
             }, function(obj) {
                 spinner.style.display = 'none';
+                progressContainer.style.display = 'none';
                 if (!obj.error) {
                     preview.src = obj.image;
                     preview.style.display = 'block';
