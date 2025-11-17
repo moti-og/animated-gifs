@@ -156,11 +156,12 @@
                     downloadLink.style.display = 'block';
                     status.textContent = 'Conversion successful!';
                     status.style.color = 'green';
+                    URL.revokeObjectURL(url); // Revoke after success
                 } else {
                     status.textContent = `Error: ${obj.errorMsg}`;
                     status.style.color = 'red';
+                    URL.revokeObjectURL(url); // Revoke on error too
                 }
-                URL.revokeObjectURL(url);
             });
         }
     </script>
