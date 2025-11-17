@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video to GIF Converter</title>
+    <style>
+        #dropzone {
+            width: 300px;
+            height: 200px;
+            border: 2px dashed #ccc;
+            text-align: center;
+            padding: 20px;
+            margin: 20px auto;
+        }
+        #dropzone.highlight {
+            border-color: purple;
+        }
+    </style>
+</head>
+<body>
+    <div id="dropzone">Drag and drop video here</div>
+    <a id="download" style="display:none;">Download GIF</a>
+    <img id="preview" style="display:none; max-width: 100%;">
+    <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js"></script>
+    <script>
+        const { createFFmpeg, fetchFile } = FFmpeg;
+        const ffmpeg = createFFmpeg({
+            log: true,
+            corePath: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js'
+        });
+        let loaded = false;
+        const dropzone = document.getElementById('dropzone');
+        const downloadLink = document.getElementById('download');
+        const preview = document.getElementById('preview');
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('highlight');
+        });
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('highlight');
+        });
+        dropzone.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('highlight');
+            const file = e.dataTransfer.files[0];
+            if (!file) return;
+            dropzone.textContent = 'Processing...';
+            if (!loaded) {
+                await ffmpeg.load();
+                loaded = true;
+            }
+            ffmpeg.FS('writeFile', file.name, await fetchFile(file));
+            await ffmpeg.run('-i', file.name, '-vf', 'fps=10,scale=640:-1:flags=lanczos', '-loop', '0', 'out.gif');
+            const data = ffmpeg.FS('readFile', 'out.gif');
+            const url = URL.createObjectURL(new Blob([data.buffer], { type: 'image/gif' }));
+            preview.src = url;
+            preview.style.display = 'block';
+            downloadLink.href = url;
+            downloadLink.download = 'output.gif';
+            downloadLink.textContent = 'Download GIF';
+            downloadLink.style.display = 'block';
+            dropzone.textContent = 'Drag and drop video here';
+        });
+    </script>
+</body>
+</html>
