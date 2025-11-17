@@ -170,8 +170,8 @@
             let desiredDuration = parseFloat(durationInput.value);
             let numFrames;
             if (desiredDuration === 0) {
-                numFrames = Math.min(Math.floor(videoDuration * fps), 500); // Cap at 500 frames for safety
-                if (numFrames > 300) {
+                numFrames = Math.min(Math.floor(videoDuration * fps), 1800); // Cap at 1800 frames (1 min at 30 FPS)
+                if (numFrames > 600) {
                     status.textContent = 'Warning: Long video detected. GIF may be truncated or take time.';
                     status.style.color = 'orange';
                 }
