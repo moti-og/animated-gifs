@@ -93,6 +93,7 @@
     <div id="progress-container" style="width: 400px; height: 10px; background-color: #e9ecef; border-radius: 5px; margin: 10px 0; display: none;">
         <div id="progress-bar" style="height: 100%; background-color: #007bff; width: 0%; border-radius: 5px; transition: width 0.3s;"></div>
     </div>
+    <div id="joke" style="text-align: center; margin: 10px; font-style: italic; color: #555; display: none;"></div>
     <div class="options" style="margin: 20px 0; text-align: center;">
         <label>FPS: <span id="fps-value">10</span></label><br>
         <input type="range" id="fps" min="5" max="30" value="10" style="width: 200px;"><br>
@@ -109,6 +110,7 @@
         const spinner = document.getElementById('spinner');
         const progressContainer = document.getElementById('progress-container');
         const progressBar = document.getElementById('progress-bar');
+        const jokeElement = document.getElementById('joke');
 
         const fpsSlider = document.getElementById('fps');
         const fpsValue = document.getElementById('fps-value');
@@ -153,6 +155,117 @@
             spinner.style.display = 'block';
             progressContainer.style.display = 'block';
             progressBar.style.width = '0%';
+            jokeElement.style.display = 'block';
+            showNextJoke();
+            const jokes = [
+                "Why don't skeletons fight each other? They don't have the guts.",
+                "What do you call fake spaghetti? An impasta.",
+                "Why did the scarecrow win an award? He was outstanding in his field.",
+                "How does a penguin build its house? Igloos it together.",
+                "Why couldn't the bicycle stand up by itself? It was two-tired.",
+                "What do you call cheese that isn't yours? Nacho cheese.",
+                "Why did the golfer bring two pairs of pants? In case he got a hole in one.",
+                "What did one wall say to the other? I'll meet you at the corner.",
+                "Why don't eggs tell jokes? They'd crack each other up.",
+                "How do you organize a space party? You planet.",
+                "Why did the tomato turn red? Because it saw the salad dressing.",
+                "What do you call a bear with no teeth? A gummy bear.",
+                "Why did the math book look sad? Because it had too many problems.",
+                "What do you call a factory that makes okay products? A satisfactory.",
+                "Why did the coffee file a police report? It got mugged.",
+                "How do you make a tissue dance? Put a little boogie in it.",
+                "Why did the picture go to jail? Because it was framed.",
+                "What do you call a dog that can do magic? A labracadabrador.",
+                "Why can't you give Elsa a balloon? Because she'll let it go.",
+                "What do you call a boomerang that doesn't come back? A stick.",
+                "Why do seagulls fly over the sea? Because if they flew over the bay, they'd be bagels.",
+                "What did the ocean say to the beach? Nothing, it just waved.",
+                "Why did the cookie go to the doctor? Because it felt crummy.",
+                "How does a snowman get around? By riding an icicle.",
+                "What do you call an alligator in a vest? An investigator.",
+                "Why did the belt get arrested? It held up a pair of pants.",
+                "What do you call a sleeping bull? A bulldozer.",
+                "Why was the math test so easy? It was a piece of cake.",
+                "What do you get when you cross a snowman and a vampire? Frostbite.",
+                "Why did the chicken go to the seance? To talk to the other side.",
+                "What do you call a pile of cats? A meowtain.",
+                "Why don't scientists trust atoms? Because they make up everything.",
+                "What did the grape do when it got stepped on? It let out a little wine.",
+                "Why did the stadium get hot? All the fans left.",
+                "What do you call a fish with no eyes? Fsh.",
+                "Why did the computer go to the doctor? It had a virus.",
+                "What do you call a dinosaur with an extensive vocabulary? A thesaurus.",
+                "Why can't you hear a pterodactyl go to the bathroom? Because the P is silent.",
+                "What do you call a group of unorganized cats? A cat-astrophe.",
+                "Why did the invisible man turn down the job offer? He couldn't see himself doing it.",
+                "What do you call a snowman with a six-pack? An abdominal snowman.",
+                "Why did the barber win the race? He knew a shortcut.",
+                "What do you call a parade of rabbits hopping backwards? A receding hare-line.",
+                "Why did the banana go to the doctor? It wasn't peeling well.",
+                "What do you call a fake noodle? An impasta.", // Duplicate, but okay
+                "Why did the duck get arrested? For selling quack.",
+                "What do you call a cow with no legs? Ground beef.",
+                "Why did the yogi refuse anesthesia? He wanted to transcend dental medication.",
+                "What do you call a magician who lost his magic? Ian.",
+                "Why did the smartphone need glasses? It lost all its contacts.",
+                "What do you call a belt made of watches? A waist of time.",
+                "Why did the mushroom go to the party? Because he was a fun-gi.",
+                "What do you call a pony with a sore throat? A little hoarse.",
+                "Why did the orange stop? It ran out of juice.",
+                "What do you call a deer with no eyes? No idea.",
+                "Why did the can crusher quit his job? Because it was soda pressing.",
+                "What do you call a labyrinth of corn? A maize.",
+                "Why did the golfer wear two pairs of pants? In case he got a hole in one.", // Duplicate
+                "What do you call a sad strawberry? A blueberry.",
+                "Why did the kid throw butter out the window? To see a butterfly.",
+                "What do you call a bee that can't make up its mind? A maybe.",
+                "Why did the student eat his homework? Because the teacher said it was a piece of cake.",
+                "What do you call a nosy pepper? Jalapeño business.",
+                "Why did the bicycle fall over? It was two-tired.", // Duplicate
+                "What do you call a man with a rubber toe? Roberto.",
+                "Why did the scarecrow become a successful neurosurgeon? He was outstanding in his field.", // Variant
+                "What do you call a fish wearing a bowtie? Sofishticated.",
+                "Why did the crab never share? Because he's shellfish.",
+                "What do you call a sleeping dinosaur? A dino-snore.",
+                "Why did the frog take the bus to work? His car got toad.",
+                "What do you call a pile of dogs? A ruff terrain.",
+                "Why did the lemon stop rolling down the hill? It ran out of juice.",
+                "What do you call a cat on the beach? Sandy Claws.",
+                "Why did the music teacher need a ladder? To reach the high notes.",
+                "What do you call a funny mountain? Hill-arious.",
+                "Why did the teddy bear say no to dessert? Because he was stuffed.",
+                "What do you call a wizard who walks everywhere? A roamin' wizard.",
+                "Why did the computer keep freezing? It left its Windows open.",
+                "What do you call a snake that's 3.14 meters long? A pi-thon.",
+                "Why did the golfer bring an extra sock? In case he got a hole in one.",
+                "What do you call a lazy kangaroo? A pouch potato.",
+                "Why did the astronaut break up with his girlfriend? He needed space.",
+                "What do you call a dog in summer? A hot dog.",
+                "Why did the tree go to the dentist? To get a root canal.",
+                "What do you call a horse that lives next door? A neigh-bor.",
+                "Why did the smartphone go to school? To improve its app-titude.",
+                "What do you call a cold dog? A chili dog.",
+                "Why did the book join the police? It wanted to go undercover.",
+                "What do you call a magical dog? A labracadabrador.", // Duplicate
+                "Why did the clock go to the principal's office? For tocking too much.",
+                "What do you call a fly without wings? A walk.",
+                "Why did the broom get a poor grade? It was always sweeping during class.",
+                "What do you call a joke that's not funny? A faux pas.",
+                "Why did the sun go to school? To get brighter.",
+                "What do you call a rich elf? Welfy.",
+                "Why did the robot go on a diet? It had too many bytes.",
+                "What do you call a group of musical whales? An orca-stra.",
+                "Why did the pencil sharpener break up with the pencil? It felt too point-less.",
+                "What do you call a mischievous egg? A practical yolker."
+            ];
+            let jokeInterval;
+            let currentJoke = 0;
+
+            function showNextJoke() {
+                jokeElement.textContent = jokes[currentJoke];
+                currentJoke = (currentJoke + 1) % jokes.length;
+            }
+
             downloadLink.style.display = 'none';
             preview.style.display = 'none';
 
@@ -195,6 +308,8 @@
             }, function(obj) {
                 spinner.style.display = 'none';
                 progressContainer.style.display = 'none';
+                clearInterval(jokeInterval);
+                jokeElement.style.display = 'none';
                 if (!obj.error) {
                     preview.src = obj.image;
                     preview.style.display = 'block';
